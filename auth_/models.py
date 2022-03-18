@@ -58,22 +58,23 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 class Profile(models.Model):
     phone_number = models.CharField(max_length=30, blank=True)
     location = models.CharField(max_length=30, blank=True)
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    user = models.OneToOneField(CustomUser, related_name="profile", on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Профиль'
         verbose_name_plural = 'Профили'
 
 
+
 class Deck(models.Model):
-    title = models.CharField(_('title'), max_length=30, blank=True)
-    progress = models.IntegerField()
+    title = models.CharField(_('title'), max_length=255, blank=True)
+    progress = models.IntegerField(default=0)
     template = models.ForeignKey(DeckTemplate, on_delete=models.CASCADE)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
 
 
 class Card(models.Model):
-    title = models.CharField(_('title'), max_length=30, blank=True)
+    title = models.CharField(_('title'), max_length=255, blank=True)
     failed = models.BooleanField(default=False)
     template = models.ForeignKey(CardTemplate, on_delete=models.CASCADE)
     deck = models.ForeignKey(Deck, on_delete=models.CASCADE, related_name="deck_cards")
