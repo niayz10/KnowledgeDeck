@@ -6,7 +6,7 @@ from rest_framework import serializers
 class DeckTemplateSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeckTemplate
-        fields = ('title')
+        fields = ('title',)
 
 
 class CardTemplateSerializer(serializers.Serializer):

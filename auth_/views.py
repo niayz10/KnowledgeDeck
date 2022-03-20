@@ -2,11 +2,11 @@ import logging
 # Create your views here.
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from auth_.models import CustomUser, Deck, Profile
-from auth_.serializers import CustomUserSerializer, CustomUserSerializerAll, DeckSerializer
+from auth_.models import CustomUser, Deck, Profile, Card
+from auth_.serializers import CustomUserSerializer, CustomUserSerializerAll, DeckSerializer, CardSerializer
 from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
 
-from core.models import DeckTemplate
+from core.models import DeckTemplate, CardTemplate
 
 logger = logging.getLogger(__name__)
 
@@ -37,9 +37,9 @@ class User(viewsets.ViewSet):
         return Response(serializer.data)
 
 
-class Deck(viewsets.ViewSet):
+class DeckViewSet(viewsets.ViewSet):
 
-    def list_of_decks(self, request):
+    def list_of_all_decks(self, request):
         logger.info('list of decks')
         decks = Deck.objects.all()
         serializer = DeckSerializer(decks, many=True)
@@ -67,4 +67,39 @@ class Deck(viewsets.ViewSet):
         logger.info('destroy a type')
         deck = Deck.objects.get(id=id)
         deck.delete()
-        return Response('succes', status=status.HTTP_200_OK)
+        return Response('success', status=status.HTTP_200_OK)
+
+    def get_cards_by_deck(self, request, id):
+        deck = Deck.objects.get(id=id)
+        cards = deck.deck_cards
+        serializer = CardSerializer(cards, many=True)
+        return Response(serializer.data)
+
+
+class CardViewSet(viewsets.ViewSet):
+
+    def list_of_all_cards(self, request):
+        cards = Card.objects.all()
+        serializer = CardSerializer(cards, many=True)
+        return Response(serializer.data)
+
+    def create_card(self, request):
+        serializer = CardSerializer(data=request.data, context={
+            "template": CardTemplate.objects.get(id=request.data.get("template_id")),
+            'deck': Deck.objects.get(id=request.data.get('deck_id'))
+        })
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def update_card(self, request, id):
+        serializer = CardSerializer(instance=Card.objects.get(id=id), data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def destroy_card(self, request, id):
+        card = Card.objects.get(id=id)
+        card.delete()
+        return Response('success', status=status.HTTP_200_OK)

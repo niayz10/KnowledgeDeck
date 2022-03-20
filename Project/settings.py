@@ -128,45 +128,45 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': True,
-    'formatters': {
-        'verbose': {
-            'format': '%(levelname)s -- %(asctime)s: %(message)s',
-        },
-        'simple': {
-            'format': '%(levelname)s -- %(message)s'
-        }
-    },
-    'handlers': {
-        'file_handler': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': 'logs.log',
-            'formatter': 'verbose'
-        },
-        'console_handler': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple'
-        }
-    },
-    'loggers': {
-        'auth_': {
-            'handlers': ['file_handler', 'console_handler'],
-            'level': 'DEBUG',
-        },
-        'base': {
-            'handlers': ['console_handler'],
-            'level': 'DEBUG',
-        },
-        'core': {
-            'handlers': ['console_handler'],
-            'level': 'DEBUG',
-        },
-    },
-}
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': True,
+#     'formatters': {
+#         'verbose': {
+#             'format': '%(levelname)s -- %(asctime)s: %(message)s',
+#         },
+#         'simple': {
+#             'format': '%(levelname)s -- %(message)s'
+#         }
+#     },
+#     'handlers': {
+#         'file_handler': {
+#             'level': 'INFO',
+#             'class': 'logging.FileHandler',
+#             'filename': 'logs.log',
+#             'formatter': 'verbose'
+#         },
+#         'console_handler': {
+#             'level': 'DEBUG',
+#             'class': 'logging.StreamHandler',
+#             'formatter': 'simple'
+#         }
+#     },
+#     'loggers': {
+#         'auth_': {
+#             'handlers': ['file_handler', 'console_handler'],
+#             'level': 'DEBUG',
+#         },
+#         'base': {
+#             'handlers': ['console_handler'],
+#             'level': 'DEBUG',
+#         },
+#         'core': {
+#             'handlers': ['console_handler'],
+#             'level': 'DEBUG',
+#         },
+#     },
+# }
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
