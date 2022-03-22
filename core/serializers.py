@@ -1,16 +1,18 @@
-from auth_ import serializers
+
+from auth_.base_abstract_serializers import DeckMixinSerializer, CardMixinSerializer
 from core.models import DeckTemplate, CardTemplate
-from rest_framework import serializers
 
 
-class DeckTemplateSerializer(serializers.ModelSerializer):
+class DeckTemplateSerializer(DeckMixinSerializer):
     class Meta:
         model = DeckTemplate
         fields = ('title',)
 
+    def create(self, validated_data):
+        return DeckTemplate.objects.create(**validated_data)
 
-class CardTemplateSerializer(serializers.Serializer):
-    title = serializers.CharField(max_length=255)
+
+class CardTemplateSerializer(CardMixinSerializer):
     deck_template = DeckTemplateSerializer(read_only=True)
 
     def create(self, validated_data):

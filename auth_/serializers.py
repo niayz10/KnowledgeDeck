@@ -1,7 +1,9 @@
 from abc import ABC
 
 from rest_framework import serializers
-from auth_.models import CustomUser, Deck, Card
+
+from auth_.base_abstract_serializers import DeckMixinSerializer, CardMixinSerializer
+from auth_.models import CustomUser, Deck, Card, ContentFragment, ContentFragmentForCard
 from core.serializers import DeckTemplateSerializer, CardTemplateSerializer
 
 
@@ -55,9 +57,8 @@ class ProfileSerializer(serializers.Serializer):
         return instance
 
 
-class DeckSerializer(serializers.Serializer):
+class DeckSerializer(DeckMixinSerializer):
     id = serializers.IntegerField(read_only=True)
-    title = serializers.CharField(max_length=255)
     progress = serializers.IntegerField(read_only=True)
     template = DeckTemplateSerializer(read_only=True)
     profile = ProfileSerializer(read_only=True)
@@ -73,11 +74,16 @@ class DeckSerializer(serializers.Serializer):
         return instance
 
 
-class CardSerializer(serializers.Serializer):
-    title = serializers.CharField(max_length=255)
-    failed = serializers.BooleanField()
+class CardSerializer(CardMixinSerializer):
+    status = serializers.IntegerField(required=False)
     template = CardTemplateSerializer(read_only=True)
     deck = DeckSerializer(read_only=True)
+
+    def validate_status(self, value):
+        if 0 <= value <= 2:
+            return value
+        else:
+            raise serializers.ValidationError("Invalid status")
 
     def create(self, validated_data):
         validated_data.setdefault('template', self.context.get('template'))
@@ -86,6 +92,36 @@ class CardSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         instance.title = validated_data.get('title', instance.title)
-        instance.failed = validated_data.get('failed', instance.failed)
+        instance.failed = validated_data.get('status', instance.status)
+        instance.save()
+        return instance
+
+
+class ContentFragmentSerializer(serializers.Serializer):
+    type = serializers.IntegerField()
+    file = serializers.FileField()
+
+    def create(self, validated_data):
+        validated_data.setdefault('upload', self.context.get('card_template'))
+        return ContentFragment.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.type = validated_data.get('type', instance.type)
+        instance.file = validated_data.get('file', instance.file)
+        instance.save()
+        return instance
+
+
+class ContentFragmentForCardSerializer(serializers.Serializer):
+    type = serializers.IntegerField()
+    file = serializers.FileField()
+
+    def create(self, validated_data):
+        validated_data.setdefault('upload', self.context.get('card'))
+        return ContentFragmentForCard.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        instance.type = validated_data.get('type', instance.type)
+        instance.file = validated_data.get('file', instance.file)
         instance.save()
         return instance

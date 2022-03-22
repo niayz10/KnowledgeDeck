@@ -3,12 +3,11 @@ from django.utils.translation import gettext_lazy as _
 
 
 # Create your models here.
+from auth_.base_models import DeckMixin, CardMixin
 
 
-class DeckTemplate(models.Model):
-    title = models.CharField(_('title'), max_length=30, blank=True)
+class DeckTemplate(DeckMixin):
+    pass
 
-
-class CardTemplate(models.Model):
-    title = models.CharField(_('title'), max_length=30, blank=True)
+class CardTemplate(CardMixin):
     deck_template = models.ForeignKey(DeckTemplate, on_delete=models.CASCADE, related_name="deck_card_templates")

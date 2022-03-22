@@ -5,6 +5,7 @@ from rest_framework import viewsets, status
 # Create your views here.
 from rest_framework.response import Response
 
+from auth_.serializers import ContentFragmentSerializer
 from core.models import DeckTemplate, CardTemplate
 from core.serializers import DeckTemplateSerializer, CardTemplateSerializer
 
@@ -20,6 +21,7 @@ class DeckTemplateViewSet(viewsets.ViewSet):
         serializer = DeckTemplateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -48,6 +50,12 @@ class CardTemplateViewSet(viewsets.ViewSet):
         })
         if serializer.is_valid():
             serializer.save()
+            content_fragment = ContentFragmentSerializer(data=request.data, context={
+                'card_template': CardTemplate.objects.get(id=serializer.data.get("id"))
+            })
+            if content_fragment.is_valid():
+                content_fragment.save()
+                return Response(content_fragment.data, status=status.HTTP_201_CREATED)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

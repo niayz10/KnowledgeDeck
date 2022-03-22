@@ -3,7 +3,8 @@ import logging
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from auth_.models import CustomUser, Deck, Profile, Card
-from auth_.serializers import CustomUserSerializer, CustomUserSerializerAll, DeckSerializer, CardSerializer
+from auth_.serializers import CustomUserSerializer, CustomUserSerializerAll, DeckSerializer, CardSerializer, \
+    ContentFragmentSerializer, ContentFragmentForCardSerializer
 from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
 
 from core.models import DeckTemplate, CardTemplate
@@ -84,12 +85,21 @@ class CardViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def create_card(self, request):
+
         serializer = CardSerializer(data=request.data, context={
             "template": CardTemplate.objects.get(id=request.data.get("template_id")),
             'deck': Deck.objects.get(id=request.data.get('deck_id'))
         })
         if serializer.is_valid():
             serializer.save()
+            if serializer.is_valid():
+                serializer.save()
+                content_fragment = ContentFragmentForCardSerializer(data=request.data, context={
+                    'card': Card.objects.get(id=serializer.data.get("id"))
+                })
+                if content_fragment.is_valid():
+                    content_fragment.save()
+                    return Response(content_fragment.data, status=status.HTTP_201_CREATED)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

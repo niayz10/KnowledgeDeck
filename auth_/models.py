@@ -3,10 +3,11 @@ from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.base_user import BaseUserManager
-from django.contrib.postgres.fields import ArrayField
 
 # Create your models here.
+from auth_.base_models import DeckMixin, CardMixin, ContentMixin
 from core.models import DeckTemplate, CardTemplate
+from utils.constants import STATES, STATE_DEFAULT
 
 
 class CustomUserManager(BaseUserManager):
@@ -65,16 +66,21 @@ class Profile(models.Model):
         verbose_name_plural = 'Профили'
 
 
-
-class Deck(models.Model):
-    title = models.CharField(_('title'), max_length=255, blank=True)
+class Deck(DeckMixin):
     progress = models.IntegerField(default=0)
     template = models.ForeignKey(DeckTemplate, on_delete=models.CASCADE)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
 
 
-class Card(models.Model):
-    title = models.CharField(_('title'), max_length=255, blank=True)
-    failed = models.BooleanField(default=False)
+class Card(CardMixin):
+    status = models.SmallIntegerField(choices=STATES, default=STATE_DEFAULT)
     template = models.ForeignKey(CardTemplate, on_delete=models.CASCADE)
     deck = models.ForeignKey(Deck, on_delete=models.CASCADE, related_name="deck_cards")
+
+
+class ContentFragment(ContentMixin):
+    upload = models.ForeignKey(CardTemplate, related_name="contents", on_delete=models.CASCADE)
+
+
+class ContentFragmentForCard(ContentMixin):
+    upload = models.ForeignKey(Card, related_name="contents", on_delete=models.CASCADE)
